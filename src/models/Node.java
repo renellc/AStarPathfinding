@@ -1,3 +1,5 @@
+package models;
+
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -175,7 +177,7 @@ public class Node {
 
     @Override
     public String toString() {
-        return "Node{" +
+        return "models.Node{" +
                 "x=" + x +
                 ", y=" + y +
                 ", gScore=" + gScore +
