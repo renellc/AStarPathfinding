@@ -15,7 +15,7 @@ public class Grid {
     /**
      * The visited nodes from the A* search.
      */
-    private LinkedHashSet<Node> visitedNodes;
+    private LinkedHashSet<Node> closedNodes;
 
     /**
      * Creates a new grid.
@@ -32,30 +32,14 @@ public class Grid {
 
                 // Adds neighbors for node right to the current node.
                 if (x != 0) {
-                    grid[x][y].addNeighbor(grid[x + 1][y]);
-                    grid[x + 1][y].addNeighbor(grid[x][y]);
+                    grid[x][y].addNeighbor(grid[x - 1][y]);
+                    grid[x - 1][y].addNeighbor(grid[x][y]);
                 }
 
                 // Adds neighbors for node above this node.
                 if (y != 0) {
-                    grid[x][y].addNeighbor(grid[x][y + 1]);
-                    grid[x][y + 1].addNeighbor(grid[x][y]);
-                }
-
-                // Adds the neighbors for nodes adjacent for current node.
-                if (x > 0 && y - 1 >= 0 && y + 1 <= height) {
-                    // Adjacent top right
-                    grid[x][y].addNeighbor(grid[x + 1][y + 1]);
-                    grid[x + 1][y + 1].addNeighbor(grid[x][y]);
-                    // Adjacent bottom right
-                    grid[x][y].addNeighbor(grid[x + 1][y - 1]);
-                    grid[x + 1][y - 1].addNeighbor(grid[x][y]);
-                    // Adjacent top left
-                    grid[x][y].addNeighbor(grid[x - 1][y + 1]);
-                    grid[x - 1][y + 1].addNeighbor(grid[x][y]);
-                    // Adjacent bottom left
-                    grid[x][y].addNeighbor(grid[x - 1][y - 1]);
-                    grid[x - 1][y - 1].addNeighbor(grid[x][y]);
+                    grid[x][y].addNeighbor(grid[x][y - 1]);
+                    grid[x][y - 1].addNeighbor(grid[x][y]);
                 }
             }
         }
@@ -73,7 +57,7 @@ public class Grid {
         PriorityQueue<Node> openNodes = new PriorityQueue<>();
         // Use LinkedHashSet to check if node has already been checked in O(1) time and
         // to maintain ordering of inserted items.
-        visitedNodes = new LinkedHashSet<>();
+        closedNodes = new LinkedHashSet<>();
         // Start node starts at 0 since the distance to itself is 0.
         start.setGScore(0);
         // Initial H Score is just the distance from the start to goal.
@@ -86,31 +70,31 @@ public class Grid {
         while (!openNodes.isEmpty()) {
             // Get the node with the lowest F score.
             Node current = openNodes.poll();
-            visitedNodes.add(current);
 
             // If we reached the goal, build the path and return it.
-            if (current.equals(goal)) {
+            if (current == goal) {
                 return buildPath(goal);
             }
 
+            closedNodes.add(current);
+
             for (Node neighbor : current.getNeighbors()) {
-                if (visitedNodes.contains(neighbor)) {
+                if (closedNodes.contains(neighbor) || neighbor.isObstacle()) {
                     continue;
                 }
 
                 // The G Score for the current neighbor.
-                float newGScore = current.getGScore() + findEuclidDistance(current, neighbor);
-                if (!openNodes.contains(neighbor)) {
-                    openNodes.add(neighbor);
-                } else if (newGScore >= neighbor.getGScore()) {
-                    continue;
-                }
+                int newGScore = current.getGScore() + findEuclidDistance(current, neighbor);
+                if (newGScore < neighbor.getGScore()) {
+                    neighbor.setCameFrom(current);
+                    neighbor.setGScore(newGScore);
+                    neighbor.setHScore(findEuclidDistance(neighbor, goal));
+                    neighbor.updateFScore();
 
-                // Update the neighbor's values.
-                neighbor.setCameFrom(current);
-                neighbor.setGScore(newGScore);
-                neighbor.setHScore(findEuclidDistance(neighbor, goal));
-                neighbor.updateFScore();
+                    if (!openNodes.contains(neighbor)) {
+                        openNodes.add(neighbor);
+                    }
+                }
             }
         }
 
@@ -129,7 +113,7 @@ public class Grid {
         Node current = goal;
         while (current != null) {
             path.add(current);
-            current = goal.getCameFrom();
+            current = current.getCameFrom();
         }
         return path;
     }
@@ -141,19 +125,19 @@ public class Grid {
      * @param b The second node.
      * @return The Euclidean distance between the two nodes.
      */
-    private float findEuclidDistance(Node a, Node b) {
-        float xDiff = b.getX() - a.getX();
-        float yDiff = b.getY() - a.getY();
-        return (float) Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+    private int findEuclidDistance(Node a, Node b) {
+        float xDiff = a.getX() - b.getX();
+        float yDiff = a.getY() - b.getY();
+        return (int) Math.round(Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) * 10);
     }
 
     /**
      * Resets the node's values in the grid.
      */
     public void resetGrid() {
-        for (Node node : visitedNodes) {
-            node.setHScore(Float.POSITIVE_INFINITY);
-            node.setGScore(Float.POSITIVE_INFINITY);
+        for (Node node : closedNodes) {
+            node.setHScore(Integer.MAX_VALUE);
+            node.setGScore(Integer.MAX_VALUE);
             node.setFScore(0);
             node.setCameFrom(null);
             node.getNeighbors().clear();
@@ -161,11 +145,22 @@ public class Grid {
     }
 
     /**
+     * Gets a specified node from the grid.
+     *
+     * @param x The X coordinate of the node.
+     * @param y The Y coordinate of the node.
+     * @return The node with coordinates X and Y.
+     */
+    public Node getNode(int x, int y) {
+        return grid[x][y];
+    }
+
+    /**
      * Gets the visited nodes during the A* search.
      *
      * @return The list of visited nodes during the A* search.
      */
-    public LinkedHashSet<Node> getVisitedNodes() {
-        return visitedNodes;
+    public LinkedHashSet<Node> getClosedNodes() {
+        return closedNodes;
     }
 }

@@ -5,11 +5,13 @@ import java.awt.*;
 
 public class ApplicationFrame extends JFrame {
 
-    private GridPanel gridPanel = new GridPanel(25);
-    private ControlPanel controlPanel = new ControlPanel();
+    private GridPanel gridPanel;
+    private ControlPanel controlPanel;
 
     public ApplicationFrame(int width, int height) {
         initializeFrame(width, height);
+        gridPanel = new GridPanel(25);
+        controlPanel = new ControlPanel();
 
         gridPanel.setBorder(BorderFactory.createRaisedBevelBorder());
         controlPanel.setBorder(BorderFactory.createRaisedBevelBorder());

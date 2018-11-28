@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * The representation of a node in a grid.
  */
-public class Node {
+public class Node implements Comparable{
     /**
      * The x and y coordinates of this node in a grid.
      */
@@ -19,7 +19,7 @@ public class Node {
      * H Score indicates the euclidean distance from this node to the end node.
      * F Score is the G Score + H Score.
      */
-    private float gScore, hScore, fScore;
+    private int gScore, hScore, fScore;
 
     /**
      * The node this node came from in the A* search.
@@ -32,7 +32,13 @@ public class Node {
     private LinkedList<Node> neighbors;
 
     /**
+     * Is this node an obstacle?
+     */
+    private boolean obstacle;
+
+    /**
      * Creates a new node for a grid.
+     *
      * @param x The grid X coordinate for this node.
      * @param y The grid Y coordinate for this node.
      */
@@ -40,10 +46,11 @@ public class Node {
         this.x = x;
         this.y = y;
 
-        gScore = Float.POSITIVE_INFINITY;
-        hScore = Float.POSITIVE_INFINITY;
-        fScore = 0;
+        gScore = Integer.MAX_VALUE;
+        hScore = 0;
+        fScore = gScore + hScore;
         neighbors = new LinkedList<>();
+        obstacle = false;
     }
 
     /**
@@ -101,18 +108,36 @@ public class Node {
     }
 
     /**
+     * Is the node an obstacle?
+     *
+     * @return True if the node is an obstacle, false otherwise.
+     */
+    public boolean isObstacle() {
+        return obstacle;
+    }
+
+    /**
+     * Sets the node as an obstacle or not.
+     *
+     * @param obstacle True if the node will become an obstacle, false otherwise.
+     */
+    public void setObstacle(boolean obstacle) {
+        this.obstacle = obstacle;
+    }
+
+    /**
      * Gets the Euclidean distance from this node to the start node.
      *
      * @return The Euclidean distance from this node to the start node.
      */
-    public float getGScore() {
+    public int getGScore() {
         return gScore;
     }
 
     /**
      * Sets the Euclidean distance from this node to the start node.
      */
-    public void setGScore(float gScore) {
+    public void setGScore(int gScore) {
         this.gScore = gScore;
     }
 
@@ -121,7 +146,7 @@ public class Node {
      *
      * @return The Euclidean distance from this node to the end node.
      */
-    public float getHScore() {
+    public int getHScore() {
         return hScore;
     }
 
@@ -129,7 +154,7 @@ public class Node {
     /**
      * Sets the Euclidean distance from this node to the end node.
      */
-    public void setHScore(float hScore) {
+    public void setHScore(int hScore) {
         this.hScore = hScore;
     }
 
@@ -138,7 +163,7 @@ public class Node {
      *
      * @return G Score + H Score
      */
-    public float getFScore() {
+    public int getFScore() {
         return fScore;
     }
 
@@ -147,7 +172,7 @@ public class Node {
      *
      * @param fScore The new F score.
      */
-    public void setFScore(float fScore) {
+    public void setFScore(int fScore) {
         this.fScore = fScore;
     }
 
@@ -155,7 +180,7 @@ public class Node {
      * Update the F score node based on the current G Score and H Score.
      */
     public void updateFScore() {
-        fScore = gScore + fScore;
+        fScore = gScore + hScore;
     }
 
     @Override
@@ -185,5 +210,11 @@ public class Node {
                 ", fScore=" + fScore +
                 ", cameFrom=" + cameFrom +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Node other = (Node) o;
+        return Float.compare(fScore, ((Node) o).fScore);
     }
 }
