@@ -8,16 +8,42 @@ import javax.swing.*;
 import java.awt.*;
 
 public class GridPanel extends JPanel {
-
+    /**
+     * The controller for this panel.
+     */
     private GridPanelController controller;
+
+    /**
+     * The size of each cell in the grid.
+     */
     private int cellSize;
 
+    /**
+     * Creates a new grid panel.
+     *
+     * @param cellSize The size for each cell in the grid.
+     */
     public GridPanel(int cellSize) {
         this.cellSize = cellSize;
         setBackground(Color.white);
-        Grid grid = new Grid(1262 / cellSize + 1, 636 / cellSize + 1);
+    }
+
+    /**
+     * Creates a new controller for this panel.
+     *
+     * @param grid The grid for the application.
+     */
+    public void createController(Grid grid) {
         controller = new GridPanelController(this, grid);
-        controller.performAStar();
+    }
+
+    /**
+     * Gets the controller for this panel.
+     *
+     * @return The controller for this panel.
+     */
+    public GridPanelController getController() {
+        return controller;
     }
 
     @Override
@@ -27,6 +53,7 @@ public class GridPanel extends JPanel {
             for (int x = 0; x < getWidth(); x += cellSize) {
                 g2D.setColor(Color.black);
                 g2D.fillRect(x, y, cellSize, cellSize);
+
                 Node currentNode = controller.getNode(x / cellSize, y / cellSize);
 
                 if (currentNode.isObstacle())
@@ -41,6 +68,7 @@ public class GridPanel extends JPanel {
                     g2D.setColor(Color.orange);
                 else
                     g2D.setColor(Color.white);
+                
                 g2D.fillRect(x, y, cellSize - 1, cellSize - 1);
             }
         }

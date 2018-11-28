@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * The representation of a node in a grid.
  */
-public class Node implements Comparable{
+public class Node implements Comparable {
     /**
      * The x and y coordinates of this node in a grid.
      */
