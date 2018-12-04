@@ -68,7 +68,7 @@ public class GridPanelController {
             return;
         }
 
-        path = grid.performAStar(start, goal);
+        path = grid.performAStar(start, goal, true);
     }
 
     /**

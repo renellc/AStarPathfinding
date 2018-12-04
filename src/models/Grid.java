@@ -1,12 +1,12 @@
 package models;
 
-import java.util.LinkedHashSet;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /**
  * The representation of a grid.
  */
 public class Grid {
+    private int width, height;
     /**
      * The grid represented by a 2D array of nodes.
      */
@@ -24,6 +24,8 @@ public class Grid {
      * @param height The maximum number of nodes that can be placed vertically.
      */
     public Grid(int width, int height) {
+        this.width = width;
+        this.height = height;
         grid = new Node[width][height];
 
         for (int y = 0; y < height; y++) {
@@ -48,11 +50,12 @@ public class Grid {
     /**
      * Performs A* search algorithm for the shortest path from a start node to and end node.
      *
-     * @param start The starting point for the A* search.
-     * @param goal  The node that we want to reach.
+     * @param start          The starting point for the A* search.
+     * @param goal           The node that we want to reach.
+     * @param checkDiagonals True if we check nodes diagonal to the current node, false otherwise.
      * @return If a path is found, the path from the start node to the goal node, null otherwise.
      */
-    public LinkedHashSet<Node> performAStar(Node start, Node goal) {
+    public LinkedHashSet<Node> performAStar(Node start, Node goal, boolean checkDiagonals) {
         // Use PriorityQueue to get node with lowest F score in O(log n) time.
         PriorityQueue<Node> openNodes = new PriorityQueue<>();
         // Use LinkedHashSet to check if node has already been checked in O(1) time and
@@ -83,23 +86,92 @@ public class Grid {
                     continue;
                 }
 
-                // The G Score for the current neighbor.
-                int newGScore = current.getGScore() + findEuclidDistance(current, neighbor);
-                if (newGScore < neighbor.getGScore()) {
-                    neighbor.setCameFrom(current);
-                    neighbor.setGScore(newGScore);
-                    neighbor.setHScore(findEuclidDistance(neighbor, goal));
-                    neighbor.updateFScore();
-
-                    if (!openNodes.contains(neighbor)) {
-                        openNodes.add(neighbor);
-                    }
+                // Updates the G Score, H Score, and F score for the neighbor node.
+                // If the neighbor node is an acceptable one to walk, we add it to openNodes.
+                if (updateNodeValues(current, neighbor, goal)) {
+                    openNodes.add(neighbor);
                 }
+            }
+
+            if (checkDiagonals) {
+                openNodes = checkNodeDiagonals(current, goal, openNodes);
             }
         }
 
         // If we can't find a path to the end, return nothing.
         return null;
+    }
+
+    /**
+     * In the A* search, check the nodes diagonal to a given node. This improves our path as it
+     * reduces the number of nodes needed to get to the goal.
+     *
+     * @param node      The node we are checking.
+     * @param goal      The goal node.
+     * @param openNodes The open nodes that we are going to check during A*.
+     * @return The PriorityQueue of open nodes that is used during A*.
+     */
+    private PriorityQueue<Node> checkNodeDiagonals(Node node, Node goal, PriorityQueue<Node> openNodes) {
+        int x = node.getX();
+        int y = node.getY();
+        List<Node> newOpenNodes = new LinkedList<>();
+
+        // Check the diagonal nodes to the bottom left and top left.
+        if (x - 1 >= 0) {
+            if (y - 1 >= 0) {
+                boolean shouldCheckNode = !closedNodes.contains(grid[x - 1][y - 1]) && !grid[x - 1][y - 1].isObstacle();
+                if (shouldCheckNode && updateNodeValues(node, grid[x - 1][y - 1], goal))
+                    newOpenNodes.add(grid[x - 1][y - 1]);
+            }
+
+            if (y + 1 <= height) {
+                boolean shouldCheckNode = !closedNodes.contains(grid[x - 1][y + 1]) && !grid[x - 1][y + 1].isObstacle();
+                if (shouldCheckNode && updateNodeValues(node, grid[x - 1][y + 1], goal))
+                    newOpenNodes.add(grid[x - 1][y + 1]);
+            }
+        }
+
+        // Check the diagonal nodes to the bottom right and top right.
+        if (x + 1 <= width) {
+            if (y - 1 >= 0) {
+                boolean shouldCheckNode = !closedNodes.contains(grid[x + 1][y - 1]) && !grid[x + 1][y - 1].isObstacle();
+                if (shouldCheckNode && updateNodeValues(node, grid[x + 1][y - 1], goal))
+                    newOpenNodes.add(grid[x + 1][y - 1]);
+            }
+
+            if (y + 1 <= height) {
+                boolean shouldCheckNode = !closedNodes.contains(grid[x + 1][y + 1]) && !grid[x + 1][y + 1].isObstacle();
+                if (shouldCheckNode && updateNodeValues(node, grid[x + 1][y + 1], goal))
+                    newOpenNodes.add(grid[x + 1][y + 1]);
+            }
+        }
+
+        for (Node newOpenNode : newOpenNodes) {
+            if (!openNodes.contains(newOpenNode)) {
+                openNodes.add(newOpenNode);
+            }
+        }
+        return openNodes;
+    }
+
+    /**
+     * Updates a given node's values during A*.
+     *
+     * @param current  The current node we are on.
+     * @param neighbor The neighbor to the current node.
+     * @param goal     The goal node.
+     * @return True if it should be added to the open list, false otherwise.
+     */
+    private boolean updateNodeValues(Node current, Node neighbor, Node goal) {
+        int newGScore = current.getGScore() + findEuclidDistance(current, neighbor);
+        if (newGScore < neighbor.getGScore()) {
+            neighbor.setCameFrom(current);
+            neighbor.setGScore(newGScore);
+            neighbor.setHScore(findEuclidDistance(neighbor, goal));
+            neighbor.updateFScore();
+            return true;
+        }
+        return false;
     }
 
     /**
