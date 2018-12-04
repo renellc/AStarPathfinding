@@ -135,12 +135,11 @@ public class Grid {
      * Resets the node's values in the grid.
      */
     public void resetGrid() {
+        if (closedNodes == null || closedNodes.isEmpty())
+            return;
+
         for (Node node : closedNodes) {
-            node.setHScore(Integer.MAX_VALUE);
-            node.setGScore(Integer.MAX_VALUE);
-            node.setFScore(0);
-            node.setCameFrom(null);
-            node.getNeighbors().clear();
+            node.resetNode();
         }
     }
 

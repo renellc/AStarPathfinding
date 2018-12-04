@@ -55,4 +55,11 @@ public class ApplicationController {
     public void performAStarSearch() {
         gridPanelController.performAStar();
     }
+
+    /**
+     * Clears the grid so that every cell is white.
+     */
+    public void clearGrid() {
+        gridPanelController.resetGrid();
+    }
 }

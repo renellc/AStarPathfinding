@@ -131,6 +131,8 @@ public class ApplicationFrame extends JFrame implements MouseListener, MouseMoti
             if (action == GridActions.FIND_PATH) {
                 controller.performAStarSearch();
                 gridPanel.repaint();
+            } else if (action == GridActions.CLEAR_GRID) {
+                controller.clearGrid();
             } else {
                 currentAction = action;
                 System.out.println(currentAction);

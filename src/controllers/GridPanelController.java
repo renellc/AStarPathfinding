@@ -4,7 +4,9 @@ import models.Grid;
 import models.Node;
 import views.GridPanel;
 
+import javax.swing.*;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 
 public class GridPanelController {
 
@@ -29,6 +31,11 @@ public class GridPanelController {
     private LinkedHashSet<Node> path;
 
     /**
+     * The node obstacles in the grid.
+     */
+    private LinkedList<Node> obstacles;
+
+    /**
      * Creates a new GridPanelController.
      *
      * @param panel The panel for this controller to control.
@@ -39,12 +46,28 @@ public class GridPanelController {
         this.grid = grid;
         start = grid.getNode(5, 5);
         goal = grid.getNode(10, 15);
+        obstacles = new LinkedList<>();
     }
 
     /**
      * Starts the A* search algorithm.
      */
     public void performAStar() {
+        if (start == null && goal == null) {
+            JOptionPane.showMessageDialog(panel, "Error! The start and goal node hasn't been set.");
+            return;
+        }
+
+        if (start == null) {
+            JOptionPane.showMessageDialog(panel, "Error! The start node hasn't been set.");
+            return;
+        }
+
+        if (goal == null) {
+            JOptionPane.showMessageDialog(panel, "Error! The goal node hasn't been set.");
+            return;
+        }
+
         path = grid.performAStar(start, goal);
     }
 
@@ -53,7 +76,23 @@ public class GridPanelController {
      */
     public void resetGrid() {
         grid.resetGrid();
+
+        if (path != null) {
+            for (Node node : path) {
+                node.resetNode();
+            }
+        }
+
+        if (!obstacles.isEmpty()) {
+            for (Node node : obstacles) {
+                node.resetNode();
+            }
+        }
+
         path = null;
+        obstacles = new LinkedList<>();
+        start = goal = null;
+        panel.repaint();
     }
 
     /**
@@ -110,6 +149,7 @@ public class GridPanelController {
      */
     public void setObstacle(Node node) {
         node.setObstacle(true);
+        obstacles.add(node);
     }
 
     /**
