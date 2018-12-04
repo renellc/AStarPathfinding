@@ -68,7 +68,7 @@ public class GridPanel extends JPanel {
                     g2D.setColor(Color.orange);
                 else
                     g2D.setColor(Color.white);
-                
+
                 g2D.fillRect(x, y, cellSize - 1, cellSize - 1);
             }
         }

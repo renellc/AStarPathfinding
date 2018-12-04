@@ -183,6 +183,17 @@ public class Node implements Comparable {
         fScore = gScore + hScore;
     }
 
+    /**
+     * Resets all of the nodes values.
+     */
+    public void resetNode() {
+        gScore = Integer.MAX_VALUE;
+        hScore = 0;
+        fScore = gScore + hScore;
+        setObstacle(false);
+        setCameFrom(null);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -215,6 +226,6 @@ public class Node implements Comparable {
     @Override
     public int compareTo(Object o) {
         Node other = (Node) o;
-        return Float.compare(fScore, ((Node) o).fScore);
+        return Float.compare(fScore, other.fScore);
     }
 }

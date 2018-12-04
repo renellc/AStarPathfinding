@@ -104,6 +104,31 @@ public class GridPanelController {
     }
 
     /**
+     * Sets the given node as an obstacle.
+     *
+     * @param node The node to be set as an obstacle.
+     */
+    public void setObstacle(Node node) {
+        node.setObstacle(true);
+    }
+
+    /**
+     * Resets the given node's information (G Score, H Score, F Score, which node it came from,
+     * etc.).
+     *
+     * @param node The node to be reset.
+     */
+    public void resetNode(Node node) {
+        if (node.equals(start)) {
+            start = null;
+        } else if (node.equals(goal)) {
+            goal = null;
+        }
+
+        node.resetNode();
+    }
+
+    /**
      * Gets the visited nodes during the A* search.
      *
      * @return The A* search.
